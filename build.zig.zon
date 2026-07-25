@@ -1,0 +1,14 @@
+.{
+    .name = .zbigint,
+    .version = "0.1.0",
+    .minimum_zig_version = "0.16.0",
+    .fingerprint = 0x498b276ff1260f3c,
+    .description = "Thin, general-purpose wrapper over std.math.big.int giving JS BigInt's operation set and semantics",
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src/",
+        "README.md",
+    },
+    .dependencies = .{},
+}
