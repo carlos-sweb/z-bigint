@@ -104,6 +104,13 @@ pub const ZBigInt = struct {
         return self.value.eqlZero();
     }
 
+    /// Lossy for magnitudes beyond f64's 53-bit mantissa -- matches real
+    /// JS `Number(bigint)`, which is explicitly allowed to lose precision.
+    pub fn toFloat(self: ZBigInt) f64 {
+        const result = self.value.toFloat(f64, .nearest_even);
+        return result[0];
+    }
+
     pub fn isNegative(self: ZBigInt) bool {
         return !self.value.isPositive() and !self.isZero();
     }
