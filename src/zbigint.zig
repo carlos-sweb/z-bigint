@@ -91,6 +91,26 @@ pub const ZBigInt = struct {
         return .{ .value = big.Managed.initSet(allocator, n) catch return BigIntError.OutOfMemory };
     }
 
+    /// Converts a finite float's EXACT mathematical value (not rounded
+    /// to the nearest integer) into a `ZBigInt` -- e.g. a caller that
+    /// only wants integer-valued floats (JS's `BigInt(1e21)`, say) must
+    /// reject non-integer input itself (`@floor(value) == value`) and
+    /// reject NaN/Inf itself; this trusts a finite float and truncates
+    /// any fractional part toward zero, matching `toFloat`'s inverse.
+    pub fn fromFloat(allocator: Allocator, value: f64) BigIntError!ZBigInt {
+        var r = big.Managed.init(allocator) catch return BigIntError.OutOfMemory;
+        errdefer r.deinit();
+        // A finite f64's magnitude needs at most ~1024 bits (53-bit
+        // mantissa shifted by up to a ~971-bit exponent) -- 20 usize
+        // limbs (1280 bits on a 64-bit Limb) covers the full range with
+        // headroom; `Mutable.setFloat` writes in place, it never grows.
+        r.ensureCapacity(20) catch return BigIntError.OutOfMemory;
+        var m = r.toMutable();
+        _ = m.setFloat(value, .trunc);
+        r.setMetadata(m.positive, m.len);
+        return .{ .value = r };
+    }
+
     pub fn clone(self: ZBigInt) BigIntError!ZBigInt {
         return .{ .value = self.value.clone() catch return BigIntError.OutOfMemory };
     }

@@ -15,6 +15,7 @@ pub fn build(b: *std.Build) void {
         "tests/arithmetic_test.zig",
         "tests/bitwise_test.zig",
         "tests/compare_test.zig",
+        "tests/fromfloat_test.zig",
     };
 
     inline for (test_files) |test_file| {
