@@ -1,0 +1,63 @@
+name: Tests and API documentation
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: tests-and-docs-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        zig: ['0.16.0', '0.17.0']
+        target: [x86_64-linux, x86-linux]
+        optimize: [Debug, ReleaseFast]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Zig
+        env:
+          ZIG_VERSION: ${{ matrix.zig }}
+        run: |
+          curl --fail --location --silent --show-error "https://ziglang.org/download/$ZIG_VERSION/zig-x86_64-linux-$ZIG_VERSION.tar.xz" -o "$RUNNER_TEMP/zig.tar.xz"
+          tar -xJf "$RUNNER_TEMP/zig.tar.xz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/zig-x86_64-linux-$ZIG_VERSION" >> "$GITHUB_PATH"
+      - name: Test
+        run: zig build test -Dtarget=${{ matrix.target }} -Doptimize=${{ matrix.optimize }} --summary all
+  docs:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Zig 0.17.0
+        run: |
+          curl --fail --location --silent --show-error https://ziglang.org/download/0.17.0/zig-x86_64-linux-0.17.0.tar.xz -o "$RUNNER_TEMP/zig.tar.xz"
+          tar -xJf "$RUNNER_TEMP/zig.tar.xz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/zig-x86_64-linux-0.17.0" >> "$GITHUB_PATH"
+      - name: Generate API documentation
+        run: zig build docs --summary all
+      - name: Upload generated documentation
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: zig-out/docs
+  deploy:
+    needs: docs
+    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Deploy generated API documentation
+        id: deployment
+        uses: actions/deploy-pages@v4

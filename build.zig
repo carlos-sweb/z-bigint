@@ -8,6 +8,22 @@ pub fn build(b: *std.Build) void {
         .root_source_file = b.path("src/zbigint.zig"),
     });
 
+    const docs_library = b.addLibrary(.{
+        .name = "zbigint",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/zbigint.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
+    });
+    const install_docs = b.addInstallDirectory(.{
+        .source_dir = docs_library.getEmittedDocs(),
+        .install_dir = .prefix,
+        .install_subdir = "docs",
+    });
+    const docs_step = b.step("docs", "Generate and install Zig API documentation");
+    docs_step.dependOn(&install_docs.step);
+
     const test_step = b.step("test", "Run all tests");
 
     const test_files = [_][]const u8{
@@ -16,6 +32,7 @@ pub fn build(b: *std.Build) void {
         "tests/bitwise_test.zig",
         "tests/compare_test.zig",
         "tests/fromfloat_test.zig",
+        "tests/regression_test.zig",
     };
 
     inline for (test_files) |test_file| {
