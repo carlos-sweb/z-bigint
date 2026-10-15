@@ -32,6 +32,7 @@ pub fn build(b: *std.Build) void {
         "tests/bitwise_test.zig",
         "tests/compare_test.zig",
         "tests/fromfloat_test.zig",
+        "tests/i128_test.zig",
         "tests/regression_test.zig",
     };
 

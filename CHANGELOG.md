@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1
+
+- Add exact `i128` construction and checked extraction for integrations that store signed 128-bit integer values.
+- Return `ResultTooLarge` when an arbitrary-precision value does not fit in `i128`; neither conversion uses floating point.
+
 ## 0.1.0
 
 - Support Zig 0.16.0 and 0.17.0, with Debug/ReleaseFast tests on 32-bit and 64-bit Linux targets.

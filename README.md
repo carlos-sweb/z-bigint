@@ -31,6 +31,7 @@ Open <http://localhost:8000/>. GitHub Pages publishes the same generated API, bu
 - `fromLiteralText(allocator, token)` validates a complete JS BigInt literal including trailing `n`, separator positions and decimal leading-zero restrictions. Unary signs are expression operators, not part of a literal token.
 - `fromEcmaString(allocator, text)` implements the integer-string grammar used by `BigInt(string)` on UTF-8 text: ECMAScript whitespace is trimmed, empty input means zero, separators are rejected, and a sign is permitted only for decimal input.
 - `fromInt(allocator, n: i64)` constructs an exact native integer.
+- `fromI128(allocator, n: i128)` constructs an exact signed 128-bit integer; `toI128()` extracts one or returns `ResultTooLarge` if the value does not fit. Neither conversion uses floating point.
 - `fromFloat(allocator, number: f64)` rejects nonfinite input and truncates finite fractions toward zero. Capacity is calculated for the target's limb width, including 32-bit targets.
 - `fromNumber(allocator, number: f64)` additionally rejects fractions, for the numeric conversion used by `BigInt(number)`.
 - `toFloat()` rounds to the nearest representable `f64`, ties to even; it can lose precision or overflow to infinity. Zero converts to positive `0.0`.

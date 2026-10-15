@@ -218,6 +218,11 @@ pub const ZBigInt = struct {
         return .{ .value = try big.Managed.initSet(allocator, n) };
     }
 
+    /// Construct an exact i128 without passing through a floating-point value.
+    pub fn fromI128(allocator: Allocator, n: i128) BigIntError!ZBigInt {
+        return .{ .value = try big.Managed.initSet(allocator, n) };
+    }
+
     /// Finite float conversion truncating fractions toward zero.
     pub fn fromFloat(allocator: Allocator, number: f64) BigIntError!ZBigInt {
         if (!std.math.isFinite(number)) return error.InvalidFloat;
@@ -341,6 +346,11 @@ pub const ZBigInt = struct {
     pub fn toFloat(self: ZBigInt) f64 {
         if (self.isZero()) return 0.0;
         return self.value.toFloat(f64, .nearest_even)[0];
+    }
+
+    /// Extract an exact signed i128; reject values outside that range.
+    pub fn toI128(self: ZBigInt) BigIntError!i128 {
+        return self.value.toInt(i128) catch error.ResultTooLarge;
     }
 
     /// True for a negative nonzero value; both signs of zero are false.
